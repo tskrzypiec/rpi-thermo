@@ -1,0 +1,2 @@
+# rpi-thermo
+academic project
