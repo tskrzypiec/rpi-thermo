@@ -1,0 +1,55 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <curl/curl.h>
+
+#define URL_SIZE_MAX 120
+
+static void post_event(char* url);
+
+int main(void)
+{
+    char* socket_evt_on = "https://maker.ifttt.com/trigger/gniazdko_on/with/key/";
+    char* socket_evt_off = "https://maker.ifttt.com/trigger/gniazdko_off/with/key/";
+
+    // build full url with the secret key
+    char full_url_socket_on[URL_SIZE_MAX] = {0};
+    char full_url_socket_off[URL_SIZE_MAX] = {0};
+    snprintf(full_url_socket_on, sizeof(full_url_socket_on), "%s%s", socket_evt_on, getenv("KEY"));
+    snprintf(full_url_socket_off, sizeof(full_url_socket_off), "%s%s", socket_evt_off, getenv("KEY"));
+
+    // test getenv
+    // to set env in command line type: export VAR="VAL"
+    //printf("KEY = %s\n", getenv("KEY"));
+
+    post_event(full_url_socket_on);
+
+    return 0;
+}
+
+static void post_event(char* url)
+{
+    CURL *curl = curl_easy_init();
+    CURLcode curl_res = CURLE_FAILED_INIT;
+
+    if(curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+        //curl_easy_setopt(curl, CURLOPT_NOBODY, 1); /* do not print page content */
+
+        curl_res = curl_easy_perform(curl);
+        printf("\n"); /* print new line after page content */
+
+        if(CURLE_OK != curl_res)
+        {
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(curl_res));
+        }
+        curl_easy_cleanup(curl);
+    }
+    else
+    {
+        fprintf(stderr, "curl: %s\n", curl_easy_strerror(curl_res));
+    }
+}
