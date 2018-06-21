@@ -4,15 +4,12 @@
 #include <curl/curl.h>
 #include <wiringPi.h>
 #include <stdint.h>
-
 #define URL_SIZE_MAX 120
-
 static void post_event(char *url);
-
+float curr_temp = 0;
 #define MAXTIMINGS      85
 #define DHTPIN          7
 int dht11_dat[5] = {0, 0, 0, 0, 0};
-
 
 char *socket_eft_on = "https://maker.ifttt.com/trigger/gniazdko_on/with/key/";
 char *socket_evt_off = "https://maker.ifttt.com/trigger/gniazdko_off/with/key/";
@@ -20,8 +17,8 @@ char *socket_evt_off = "https://maker.ifttt.com/trigger/gniazdko_off/with/key/";
 // build full url with the secret key
 char full_url_socket_on[URL_SIZE_MAX] = {0};
 char full_url_socket_off[URL_SIZE_MAX] = {0};
-//  snprintf(full_url_socket_on, sizeof(full_url_socket_on), "%s%s", socket_evt_on));
-//   snprintf(full_url_socket_off, sizeof(full_url_socket_off), "%s%s", socket_evt_off, getenv("KEY"));
+snprintf(full_url_socket_on, sizeof(full_url_socket_on), "%s%s", socket_evt_on, getenv("KEY"));
+snprintf(full_url_socket_off, sizeof(full_url_socket_off), "%s%s", socket_evt_off, getenv("KEY"));
 
 void read_dht11_dat() {
     uint8_t laststate = HIGH;
@@ -67,8 +64,9 @@ void read_dht11_dat() {
     }
     /*
      * check we read 40 bits (8bit x 5 ) + verify checksum in the last byte
-printf( "Temperature = %d.%d *C (%.1f *F)\n",
-                     dht11_dat[2], dht11_dat[3], f );        * print it out if data is good
+        printf( "Temperature = %d.%d *C (%.1f *F)\n",
+        dht11_dat[2], dht11_dat[3], f );
+        * print it out if data is good
      */
     if ((j >= 40) &&
         (dht11_dat[4] == ((dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF))) {
@@ -82,18 +80,6 @@ printf( "Temperature = %d.%d *C (%.1f *F)\n",
 
     float curr_temp = (float) dht11_dat[2] + (float) dht11_dat[3] / 100;
     printf("test: %f\n", curr_temp);
-    float czujnik = 0;
-
-    czujnik = curr_temp;
-/*                              if(curr_temp>25)
-                        {
-                                        post_event(full_url_socket_on);
-
-                                }
-else{
-printf("za niska temperatura!\n");
-}
-*/
 
 }
 
@@ -118,15 +104,11 @@ static void post_event(char *url) {
     }
 }
 
-
 int main(void) {
 
-    float curr_temp = 0;
-    float czujnik;
     // test getenv
     // to set env in command line type: export VAR="VAL"
     //printf("KEY = %s\n", getenv("KEY"));
-
 
     if (wiringPiSetup() == -1)
         exit(1);
@@ -135,31 +117,14 @@ int main(void) {
         read_dht11_dat();
         delay(1000); /* wait 1sec to refresh */
 
-
-
-        if (curr_temp> 25) {
+        if (curr_temp > 25) {
             post_event(full_url_socket_on);
 
         } else {
-
-            printf("za niska temperatura!\n, bo jest =");
-            printf("%f", czujnik);
+            printf("Temp is too low for cooling!\n, temp = ");
+            printf("%f", curr_temp);
         }
     }
-
-    /* if(curr_temp>25)
-       {
-          post_event(full_url_socket_on);
-
-       }
-    else{
-
-    printf("za niska temperatura!\n");
-
-    }*/
-
-
-//post_event(fulurl_socket_on);
 
     return (0);
 }
