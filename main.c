@@ -110,12 +110,13 @@ int main(int argc, char **argv)
     }
 
     // handle command line args
-    if (1 > argc)
+    //printf("dbg: %d\n", argc);
+    //for(int i=0; i<argc; ++i)
+    //    printf("dbg: %d: %s\n", i, argv[i]);
+
+   if (2 > argc)
     {
-          std::cerr << "Usage: " << name << " <option>\n"
-              << "Options:\n"
-              << "\t--[number_of_degress_you_want_to_start_coolig_from]\n"
-              << std::endl;
+        printf("Usage: %s <option>\nOptions:\n\t--[degress to start cooling from]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
 
     // main program
     float read_temp = 0.0f;
-    float temp_down = 5.0f; /* magic number */
+    float temp_down = 2.0f; /* magic number */
 
     while (1)
     {
